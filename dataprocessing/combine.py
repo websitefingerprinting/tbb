@@ -20,10 +20,10 @@ def parse_arguments():
 						dest = 'dirlist',
 						default = [],
 						help='bacth folders')
-    parser.add_argument('-m',
-                        action='store_true', 
-                        default=False,
-                        help='The type of dataset: is mon or unmon?.')
+	parser.add_argument('-m',
+						action='store_true', 
+						default=False,
+						help='The type of dataset: is mon or unmon?.')
 	parser.add_argument('-mode',
 						type=str,
 						metavar='<dataset type>',
@@ -61,25 +61,25 @@ def parse_arguments():
 	return args
 
 def init_directories(mode, t, l, e, w):
-    # Create a results dir if it doesn't exist yet
-    if not os.path.exists(DumpDir):
-        makedirs(DumpDir)
+	# Create a results dir if it doesn't exist yet
+	if not os.path.exists(DumpDir):
+		makedirs(DumpDir)
 
-    # Define output directory
-    # timestamp = time.strftime('%m%d_%H%M')
-    if args.mode == 'clean':
-    	output_dir = join(DumpDir, mode+"_clean")
-    elif args.mode == 'tamaraw':
-    	output_dir = join(DumpDir, mode+"_tamaraw")
-    elif args.mode == 'wt':
-    	output_dir = join(DumpDir, mode+"_wt")
-    elif args.mode == 'dp':
-    	output_dir = join(DumpDir, mode+"_T"+t+"_L"+l+"_E"+e+"_W"+w)
-    else:
-    	raise ValueError("Wrong dataset type!")
-    makedirs(output_dir)
+	# Define output directory
+	# timestamp = time.strftime('%m%d_%H%M')
+	if args.mode == 'clean':
+		output_dir = join(DumpDir, mode+"_clean")
+	elif args.mode == 'tamaraw':
+		output_dir = join(DumpDir, mode+"_tamaraw")
+	elif args.mode == 'wt':
+		output_dir = join(DumpDir, mode+"_wt")
+	elif args.mode == 'dp':
+		output_dir = join(DumpDir, mode+"_T"+t+"_L"+l+"_E"+e+"_W"+w)
+	else:
+		raise ValueError("Wrong dataset type!")
+	makedirs(output_dir)
 
-    return output_dir
+	return output_dir
 
 if __name__ == '__main__':
 	args = parse_arguments()
