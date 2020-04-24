@@ -60,21 +60,26 @@ def parse_arguments():
 	args = parser.parse_args()
 	return args
 
-def init_directories(mode, t, l, e, w):
+def init_directories(ismon, t, l, e, w):
 	# Create a results dir if it doesn't exist yet
 	if not os.path.exists(DumpDir):
 		makedirs(DumpDir)
 
+	if ismon:
+		world = 'mon'
+	else:
+		world = 'unmon'
+
 	# Define output directory
 	# timestamp = time.strftime('%m%d_%H%M')
 	if args.mode == 'clean':
-		output_dir = join(DumpDir, mode+"_clean")
+		output_dir = join(DumpDir, world+"_clean")
 	elif args.mode == 'tamaraw':
-		output_dir = join(DumpDir, mode+"_tamaraw")
+		output_dir = join(DumpDir, world+"_tamaraw")
 	elif args.mode == 'wt':
-		output_dir = join(DumpDir, mode+"_wt")
+		output_dir = join(DumpDir, world+"_wt")
 	elif args.mode == 'dp':
-		output_dir = join(DumpDir, mode+"_T"+t+"_L"+l+"_E"+e+"_W"+w)
+		output_dir = join(DumpDir, world+"_T"+t+"_L"+l+"_E"+e+"_W"+w)
 	else:
 		raise ValueError("Wrong dataset type!")
 	makedirs(output_dir)
@@ -84,7 +89,7 @@ def init_directories(mode, t, l, e, w):
 if __name__ == '__main__':
 	args = parse_arguments()
 	folders = args.dirlist
-	output_dir = init_directories(args.mode, args.t, args.l, args.e, args.w)
+	output_dir = init_directories(args.m, args.t, args.l, args.e, args.w)
 	print("Mode:{}, Create fold {}".format(args.mode,output_dir))
 
 	cnt = {}
