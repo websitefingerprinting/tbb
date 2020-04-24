@@ -20,15 +20,15 @@ def parse_arguments():
 						dest = 'dirlist',
 						default = [],
 						help='bacth folders')
+    parser.add_argument('-m',
+                        action='store_true', 
+                        default=False,
+                        help='The type of dataset: is mon or unmon?.')
 	parser.add_argument('-mode',
 						type=str,
-						metavar='<mode>',
-						default='mon',
-						help='monitor or unmonitor:mon, unmon')	
-	parser.add_argument('-dataset',
-						type=str,
 						metavar='<dataset type>',
-						help='clean or defended?:clean, dp, tamaraw')	
+						choices=['clean', 'dp', 'tamaraw','wt'],
+						help='clean or defended?:clean, dp, tamaraw, walkie talkie')	
 	parser.add_argument('-t',
 						type=str,
 						metavar='<T>',
@@ -67,13 +67,13 @@ def init_directories(mode, t, l, e, w):
 
     # Define output directory
     # timestamp = time.strftime('%m%d_%H%M')
-    if args.dataset == 'clean':
+    if args.mode == 'clean':
     	output_dir = join(DumpDir, mode+"_clean")
-    elif args.dataset == 'tamaraw':
+    elif args.mode == 'tamaraw':
     	output_dir = join(DumpDir, mode+"_tamaraw")
-    elif args.dataset == 'wt':
+    elif args.mode == 'wt':
     	output_dir = join(DumpDir, mode+"_wt")
-    elif args.dataset == 'dp':
+    elif args.mode == 'dp':
     	output_dir = join(DumpDir, mode+"_T"+t+"_L"+l+"_E"+e+"_W"+w)
     else:
     	raise ValueError("Wrong dataset type!")
@@ -91,7 +91,7 @@ if __name__ == '__main__':
 	for folder in folders:
 		files = glob.glob(join(folder, "*"+args.suffix))
 		for file in files:
-			if args.mode == 'mon':
+			if args.m:
 
 				tmp = file.split("/")[-1].split(args.suffix)[0]
 				label = int(tmp.split("-")[0])
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 				# 	# print(cmd)
 				# 	subprocess.call(cmd, shell = True) 
 	
-	if args.mode == 'unmon':
+	if args.m:
 		#to do
 		pass
 		# tmp = output_dir.rstrip("/").split("/")[-1]
