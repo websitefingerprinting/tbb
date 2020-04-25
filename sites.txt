@@ -45,7 +45,6 @@ https://www.github.com
 https://www.stackoverflow.com
 https://www.apple.com
 https://www.tribunnews.com
-https://www.microsoftonline.com
 https://www.pinterest.com
 https://www.xnxx.com
 https://www.amazon.de
@@ -98,7 +97,6 @@ https://www.gamepedia.com
 https://www.hicpm10.com
 https://www.redtube.com
 https://www.globo.com
-https://www.fapmeth.com
 https://www.cnet.com
 https://www.vice.com
 https://www.alibaba.com
