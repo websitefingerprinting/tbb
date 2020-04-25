@@ -9,6 +9,9 @@ import time
 import numpy as np
 Pardir = abspath(join(dirname(__file__), pardir))
 DumpDir = join( Pardir , "dataset")
+
+MON_SITE_NUM = 100
+
 def parse_arguments():
 
 	parser = argparse.ArgumentParser(description='Combine parsed datasets')
@@ -92,7 +95,8 @@ if __name__ == '__main__':
 	output_dir = init_directories(args.m, args.t, args.l, args.e, args.w)
 	print("Mode:{}, Create fold {}".format(args.mode,output_dir))
 
-	cnt = {}
+
+	cnt = [0]*MON_SITE_NUM
 	for folder in folders:
 		files = glob.glob(join(folder, "*"+args.suffix))
 		for file in files:
@@ -100,13 +104,15 @@ if __name__ == '__main__':
 
 				tmp = file.split("/")[-1].split(args.suffix)[0]
 				label = int(tmp.split("-")[0])
-				inst  = int(tmp.split("-")[1])
-				if label in cnt.keys():
-					newinst = cnt[label]
-					cnt[label] += 1
-				else:
-					newinst = 0
-					cnt[label] = 1
+				# inst  = int(tmp.split("-")[1])
+				newinst = cnt[label]
+				cnt[label] += 1
+				# if label in cnt.keys():
+				# 	newinst = cnt[label]
+				# 	cnt[label] += 1
+				# else:
+				# 	newinst = 0
+				# 	cnt[label] = 1
 
 				newfiledir = join( output_dir, str(label) + '-' + str(newinst) +args.suffix)
 				cmd = "cp " + file + " " + newfiledir
@@ -131,3 +137,7 @@ if __name__ == '__main__':
 		# # print(cmd)
 		
 		# subprocess.call(cmd,shell=True)
+
+	for i in range(MON_SITE_NUM):
+		print("#{}:{}".format(i, cnt[i]))
+
