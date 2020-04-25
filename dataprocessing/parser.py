@@ -96,6 +96,49 @@ def get_cells(tls_str,cum_times,cum_bytes, dire):
             cells.append([pkt_t, dire])
     return cells   
 
+# def clean_parse(fdir):
+#     global savedir, suffix, ismon
+#     batch,site,inst = fdir.split("/")[-2].split("_")
+#     if ismon:
+#         savefiledir = join(savedir, site+"-"+inst+suffix) 
+#     else:
+#         savefiledir = join(savedir, site+suffix)
+#     packets = rdpcap(fdir)
+
+#     try:
+#         t0 = packets[0].time
+#         in_pkts = []
+#         out_pkts = []
+#         out_tls_str = b""
+#         in_tls_str = b""
+#         out_cum_bytes = [0]
+#         in_cum_bytes = [0]
+#         out_cum_times = [0]
+#         in_cum_times = [0]
+
+#         for i,pkt in enumerate(packets):
+#             payload = pkt.load
+#             dire = getDirection(pkt)
+#             t = getTimestamp(pkt, t0)
+#             if dire == 1:
+#                 out_tls_str += payload
+#                 out_cum_bytes.append(len(out_tls_str))
+#                 out_cum_times.append(t)
+#             else:
+#                 in_tls_str += payload
+#                 in_cum_bytes.append(len(in_tls_str))
+#                 in_cum_times.append(t)
+#         out_pkts = get_cells(out_tls_str,out_cum_times,out_cum_bytes,1)
+#         in_pkts = get_cells(in_tls_str,in_cum_times,in_cum_bytes,-1)
+#         #sort packets
+#         total_pkts_unsorted = np.array(in_pkts + out_pkts)
+#         total_pkts0 = total_pkts_unsorted[total_pkts_unsorted[:,0].argsort(kind = "mergesort")]
+#         with open(savefiledir, 'w') as f:
+#             for pkt in total_pkts0:
+#                 f.write("{:.6f}\t{:.0f}\n".format(pkt[0],pkt[1])) 
+#     except Exception as e: 
+#       print("Error in {}: {}".format(fdir.split('/')[-1], e))
+
 def clean_parse(fdir):
     global savedir, suffix, ismon
     batch,site,inst = fdir.split("/")[-2].split("_")
@@ -106,39 +149,35 @@ def clean_parse(fdir):
     packets = rdpcap(fdir)
 
     try:
-        t0 = packets[0].time
-        in_pkts = []
-        out_pkts = []
-        out_tls_str = b""
-        in_tls_str = b""
-        out_cum_bytes = [0]
-        in_cum_bytes = [0]
-        out_cum_times = [0]
-        in_cum_times = [0]
-
-        for i,pkt in enumerate(packets):
-            payload = pkt.load
-            dire = getDirection(pkt)
-            t = getTimestamp(pkt, t0)
-            if dire == 1:
-                out_tls_str += payload
-                out_cum_bytes.append(len(out_tls_str))
-                out_cum_times.append(t)
-            else:
-                in_tls_str += payload
-                in_cum_bytes.append(len(in_tls_str))
-                in_cum_times.append(t)
-        out_pkts = get_cells(out_tls_str,out_cum_times,out_cum_bytes,1)
-        in_pkts = get_cells(in_tls_str,in_cum_times,in_cum_bytes,-1)
-        #sort packets
-        total_pkts_unsorted = np.array(in_pkts + out_pkts)
-        total_pkts0 = total_pkts_unsorted[total_pkts_unsorted[:,0].argsort(kind = "mergesort")]
         with open(savefiledir, 'w') as f:
-            for pkt in total_pkts0:
-                f.write("{:.6f}\t{:.0f}\n".format(pkt[0],pkt[1])) 
-    except Exception as e: 
-      print("Error in {}: {}".format(fdir.split('/')[-1], e))
+            # for i, pkt in enumerate(packets):
+            #     #skip the first few noise packets
+            #     if getDirection(pkt)>0 :
+            #         start = i
+            #         t0 = pkt.time
+            #         print("Start from pkt no. {}".format(start))
+            #         break
 
+            for i, pkt in enumerate(packets[start:]):
+                b = raw(pkt.payload.payload.payload)
+                byte_ind = b.find(b'\x17\x03\x03')
+                while byte_ind != -1 and byte_ind < len(b):
+                    if b[byte_ind:byte_ind + 3] == b'\x17\x03\x03':
+                        TLS_LEN = int.from_bytes(b[byte_ind+3:byte_ind+5], 'big')
+                        cur_time = getTimestamp(pkt,t0)
+                        cur_dir = getDirection(pkt)
+                        #complete TLS record
+                        cell_num = TLS_LEN /CELL_SIZE
+                        cell_num = int(np.round(cell_num))
+                     
+                        for i in range(cell_num):
+                            f.write("{:.6f}\t{:d}\n".format(cur_time, cur_dir))
+                        byte_ind += TLS_LEN + 5
+                    else:
+                        #What happened here?
+                        break
+    except Exception as e:
+        print("Error in {}, {} ".format(fdir.split('/')[-1], e))
 
 
 def burst_parse(fdir):
@@ -254,6 +293,7 @@ if __name__ == "__main__":
 
     pool = mp.Pool(processes=15)
     if args.mode == 'clean':
+        # pool.map(clean_parse, filelist)
         pool.map(clean_parse, filelist)
     elif args.mode == 'burst':
         pool.map(burst_parse, filelist)
