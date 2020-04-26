@@ -151,6 +151,7 @@ def clean_parse(fdir):
     try:
         with open(savefiledir, 'w') as f:
             start = 0
+            t0 = packets[0].time
             # for i, pkt in enumerate(packets):
             #     #skip the first few noise packets
             #     if getDirection(pkt)>0 :
